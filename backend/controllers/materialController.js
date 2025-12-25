@@ -1,6 +1,7 @@
-import Material from "../models/Material.js";
+import Material from "../models/MaterialModel.js";
 import extractPdfText from "../utils/pdfParser.js";
 import extractDocText from "../utils/docParser.js";
+import extractPptx from "../utils/pptxParser.js";
 import uploadToCloudinary from "../utils/cloudinaryUpload.js";
 
 import path from "path";
@@ -19,8 +20,10 @@ export const uploadMaterial = async (req, res) => {
 
     if (ext === ".pdf") {
       extractedText = await extractPdfText(file.path);
-    } else if (ext === ".doc" || ext === ".docx") {
+    } else if (ext === ".docx") {
       extractedText = await extractDocText(file.path);
+    } else if (ext === ".pptx") {
+      extractedText = await extractPptx(file.path);
     } else {
       return res.status(400).json({ message: "Unsupported file type" });
     }
