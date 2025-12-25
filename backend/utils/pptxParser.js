@@ -1,22 +1,13 @@
-import pptxParser from "pptx-parser";
+import officeParser from "officeparser";
 
 /**
- * Parse PPTX file buffer and extract text
+ * Parse PPTX buffer and extract text
  * @param {Buffer} fileBuffer
  * @returns {Promise<string>}
  */
 const parsePptx = async (fileBuffer) => {
-  const slides = await pptxParser(fileBuffer);
-
-  let extractedText = "";
-
-  slides.forEach((slide, slideIndex) => {
-    slide.texts.forEach(text => {
-      extractedText += text + " ";
-    });
-  });
-
-  return extractedText.trim();
+  const text = await officeParser.parseOfficeAsync(fileBuffer);
+  return text;
 };
 
 export default parsePptx;
