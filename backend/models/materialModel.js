@@ -7,7 +7,7 @@ const materialSchema = new mongoose.Schema(
     course: { type: String, required: true },
     fileUrl: { type: String, required: true },
     textContent: { type: String },
-    embedding: { type: Array },
+    // embedding: { type: Array },
   },
   { timestamps: true }
 );
