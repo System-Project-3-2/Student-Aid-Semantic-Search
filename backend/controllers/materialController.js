@@ -1,4 +1,4 @@
-import Material from "../models/MaterialModel.js";
+import Material from "../models/materialModel.js";
 import extractPdfText from "../utils/pdfParser.js";
 import extractDocText from "../utils/docParser.js";
 import extractPptx from "../utils/pptxParser.js";
