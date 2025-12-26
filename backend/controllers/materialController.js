@@ -4,6 +4,10 @@ import extractDocText from "../utils/docParser.js";
 import extractPptx from "../utils/pptxParser.js";
 import uploadToCloudinary from "../utils/cloudinaryUpload.js";
 
+import MaterialChunk from "../models/materialChunkModel.js";
+import { chunkText } from "../utils/chunkText.js";
+import { embedText } from "../services/embeddingService.js";
+
 import path from "path";
 
 export const uploadMaterial = async (req, res) => {
@@ -39,6 +43,15 @@ export const uploadMaterial = async (req, res) => {
     };
 
     const newMaterial = await Material.create(material);
+    const chunks = chunkText(extractedText, 600); //chunkify the text
+    for (const chunk of chunks) {
+      const embedding = await embedText(chunk);
+      await MaterialChunk.create({
+        materialId: newMaterial._id,
+        chunkText: chunk,
+        embedding,
+      });
+    }
 
     res.status(201).json(newMaterial);
   } catch (error) {
