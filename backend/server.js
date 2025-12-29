@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 
 import authRoutes from './routes/authRoutes.js';
 import materialRoutes from './routes/materialRoutes.js';
+import searchRoutes from './routes/searchRoutes.js';
 
 const app = express();
 
@@ -18,6 +19,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 
 app.use('/api/materials', materialRoutes);
+
+app.use("/api/search", searchRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
