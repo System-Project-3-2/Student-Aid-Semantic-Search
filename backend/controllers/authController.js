@@ -1,16 +1,25 @@
 import User from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { detectRoleFromEmail } from "../utils/detectRoleFromEmail.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
+
+    const role = detectRoleFromEmail(email);
+    if (!role) {
+      return res.status(400).json({ message: "Invalid email domain" });
+    }
+
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = {
       name,
@@ -31,6 +40,8 @@ export const registerUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
 
 export const loginUser = async (req, res) => {
   try {
