@@ -1,6 +1,8 @@
 import User from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { sendEmail } from "../utils/sendEmail.js";
 import { detectRoleFromEmail } from "../utils/detectRoleFromEmail.js";
 
 export const registerUser = async (req, res) => {
@@ -21,12 +23,28 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+
     const user = {
       name,
       email,
       password: hashedPassword,
       role,
+      otp,
+      otpExpiry,
     };
+
+    //send OTP
+    await sendEmail(
+      email,
+      "Verify your email",
+      `Your OTP for email verification is: ${otp}. It is valid for 10 minutes from now.`
+    );
+
+    res.status(201).json({
+      message: "OTP sent to your KUET email",
+    });
 
     const newUser = await User.create(user);
     res.status(201).json({ message: "User registered successfully" });
@@ -40,8 +58,6 @@ export const registerUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-
 
 export const loginUser = async (req, res) => {
   try {
