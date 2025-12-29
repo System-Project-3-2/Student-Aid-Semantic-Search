@@ -10,6 +10,9 @@ const userSchema = new mongoose.Schema(
       enum: ["teacher", "student", "admin"],
       default: "student",
     },
+    isVerified: { type: Boolean, default: false },
+    otp: String,
+    otpExpiry: Date,
   },
   { timestamps: true }
 );
