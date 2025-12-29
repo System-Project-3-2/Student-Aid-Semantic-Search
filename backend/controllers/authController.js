@@ -35,6 +35,8 @@ export const registerUser = async (req, res) => {
       otpExpiry,
     };
 
+    const newUser = await User.create(user);
+
     //send OTP
     await sendEmail(
       email,
@@ -45,15 +47,6 @@ export const registerUser = async (req, res) => {
     res.status(201).json({
       message: "OTP sent to your KUET email",
     });
-
-    const newUser = await User.create(user);
-    res.status(201).json({ message: "User registered successfully" });
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
-    res.status(201).json({ token, user });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -65,7 +58,7 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: "User isn't registered" });
     }
     const isMatch = await bcrypt.compare(password, user.password);
 
