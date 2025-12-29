@@ -4,6 +4,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.6",
     "axios": "^1.13.2",
+    "nodemailer": "^7.0.12",
     "react-router-dom": "^7.11.0"
   }
 }
