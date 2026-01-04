@@ -3,6 +3,7 @@ import extractPdfText from "../utils/pdfParser.js";
 import extractDocText from "../utils/docParser.js";
 import extractPptx from "../utils/pptxParser.js";
 import uploadToCloudinary from "../utils/cloudinaryUpload.js";
+import deletefromCloudinary from "../utils/cloudinaryDelete.js";
 
 import MaterialChunk from "../models/materialChunkModel.js";
 import { chunkText } from "../utils/chunkText.js";
@@ -34,7 +35,7 @@ export const uploadMaterial = async (req, res) => {
 
     const fileUrl = await uploadToCloudinary(file.path);
 
-    const material={
+    const material = {
       title,
       course,
       type,
@@ -54,6 +55,23 @@ export const uploadMaterial = async (req, res) => {
     }
 
     res.status(201).json(newMaterial);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const deleteMaterial = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const material = await Material.findById(id);
+    if (!material) {
+      return res.status(404).json({ message: "Material not found" });
+    }
+    await deletefromCloudinary(material.fileUrl);
+    await Material.findByIdAndDelete(id);
+    await MaterialChunk.deleteMany({ materialId: id });
+
+    res.status(200).json({ message: "Material deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
