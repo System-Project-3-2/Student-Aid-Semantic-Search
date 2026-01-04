@@ -10,5 +10,13 @@ export const detectRoleFromEmail = (email) => {
   if (email.endsWith("@kuet.ac.bd") && !email.endsWith("@stud.kuet.ac.bd")) {
     return "teacher";
   }
+
+  if (
+    email.endsWith("@admin.kuet.ac.bd") &&
+    !email.endsWith("@stud.kuet.ac.bd")
+  ) {
+    return "admin";
+  }
+
   return null;
 };

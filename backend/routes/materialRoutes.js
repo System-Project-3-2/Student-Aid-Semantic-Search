@@ -9,7 +9,7 @@ import { authorize } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
-router.post("/upload", protect, upload.single("file"), uploadMaterial);
-router.delete("/:id", protect, authorize("teacher"), deleteMaterial);
+router.post("/upload", protect, authorize("teacher", "admin"), upload.single("file"), uploadMaterial);
+router.delete("/:id", protect, authorize("teacher", "admin"), deleteMaterial);
 
 export default router;
