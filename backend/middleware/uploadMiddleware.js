@@ -9,8 +9,8 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase();
-  fileType=[".pdf", ".docx", ".pptx"]
-  if (fileType.includes(ext)) {
+  const fileTypes = [".pdf", ".docx", ".pptx"];
+  if (fileTypes.includes(ext)) {
     cb(null, true);
   } else {
     cb(new Error("Only PDF, DOCX, PPTX allowed"));

@@ -1,5 +1,5 @@
 import MaterialChunk from "../models/materialChunkModel.js";
-import { embedText } from "../services/embeddingService.js";
+import { embedText } from "../services/embeddingServices.js";
 import { cosineSimilarity } from "../utils/cosineSimilarity.js";
 
 export const semanticSearch = async (req, res) => {

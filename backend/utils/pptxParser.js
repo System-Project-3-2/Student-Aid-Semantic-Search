@@ -1,11 +1,13 @@
+import fs from "fs";
 import officeParser from "officeparser";
 
 /**
- * Parse PPTX buffer and extract text
- * @param {Buffer} fileBuffer
+ * Parse PPTX file and extract text
+ * @param {string} filePath
  * @returns {Promise<string>}
  */
-const parsePptx = async (fileBuffer) => {
+const parsePptx = async (filePath) => {
+  const fileBuffer = fs.readFileSync(filePath);
   const text = await officeParser.parseOfficeAsync(fileBuffer);
   return text;
 };

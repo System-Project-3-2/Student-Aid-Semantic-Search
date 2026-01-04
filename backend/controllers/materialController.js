@@ -7,7 +7,7 @@ import deletefromCloudinary from "../utils/cloudinaryDelete.js";
 
 import MaterialChunk from "../models/materialChunkModel.js";
 import { chunkText } from "../utils/chunkText.js";
-import { embedText } from "../services/embeddingService.js";
+import { embedText } from "../services/embeddingServices.js";
 
 import path from "path";
 
@@ -20,15 +20,15 @@ export const uploadMaterial = async (req, res) => {
       return res.status(400).json({ message: "File missing" });
     }
 
-    let extractedText = "";
+    let textContent = "";
     const ext = path.extname(file.originalname).toLowerCase();
 
     if (ext === ".pdf") {
-      extractedText = await extractPdfText(file.path);
+      textContent = await extractPdfText(file.path);
     } else if (ext === ".docx") {
-      extractedText = await extractDocText(file.path);
+      textContent = await extractDocText(file.path);
     } else if (ext === ".pptx") {
-      extractedText = await extractPptx(file.path);
+      textContent = await extractPptx(file.path);
     } else {
       return res.status(400).json({ message: "Unsupported file type" });
     }
@@ -40,11 +40,11 @@ export const uploadMaterial = async (req, res) => {
       course,
       type,
       fileUrl,
-      extractedText,
+      textContent,
     };
 
     const newMaterial = await Material.create(material);
-    const chunks = chunkText(extractedText, 600); //chunkify the text
+    const chunks = chunkText(textContent, 600); // chunkify the text
     for (const chunk of chunks) {
       const embedding = await embedText(chunk);
       await MaterialChunk.create({
