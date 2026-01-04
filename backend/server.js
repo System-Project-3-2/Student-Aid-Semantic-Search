@@ -1,6 +1,6 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 
 import authRoutes from './routes/authRoutes.js';
@@ -8,8 +8,6 @@ import materialRoutes from './routes/materialRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
 
 const app = express();
-
-dotenv.config();
 connectDB();
 
 app.use(cors());
