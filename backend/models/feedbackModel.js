@@ -39,7 +39,11 @@ const feedbackSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    resolvedAt: {
+      type: Date,
+    },
   },
+
   { timestamps: true }
 );
 

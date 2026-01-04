@@ -1,4 +1,4 @@
-import Feedback from "../models/feedbackModel";
+import Feedback from "../models/feedbackModel.js";
 
 export const createFeedback = async (req, res) => {
   try {
@@ -49,6 +49,7 @@ export const respondToFeedback = async (req, res) => {
 
   feedback.response = response;
   feedback.status = "resolved";
+  feedback.resolvedAt = new Date();
   feedback.respondedBy = req.user._id;
 
   await feedback.save();
