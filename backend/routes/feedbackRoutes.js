@@ -14,7 +14,7 @@ const router = express.Router();
 
 //student routes
 router.post("/", protect, authorize("student"), createFeedback);
-router.get("/my-feedbacks", authorize("student"), protect, getMyFeedbacks);
+router.get("/my-feedbacks", protect, authorize("student"), getMyFeedbacks);
 
 //Teacher/Admin routes
 router.get("/", protect, authorize("admin", "teacher"), getAllFeedbacks);
