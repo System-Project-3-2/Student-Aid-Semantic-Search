@@ -17,22 +17,24 @@ const embedWithOpenAI = async (text) => {
 };
 
 // ============= Hugging Face Embedding (FREE) =============
-const HF_MODEL = "sentence-transformers/all-MiniLM-L6-v2"; // Free, fast, good quality
+// Using BAAI/bge-small-en-v1.5 - optimized for embeddings via TEI
+const HF_MODEL = "BAAI/bge-small-en-v1.5";
 
 const embedWithHuggingFace = async (text) => {
   const HF_API_KEY = process.env.HUGGINGFACE_API_KEY;
   
+  // Use the Text Embeddings Inference (TEI) endpoint
   const response = await fetch(
-    `https://api-inference.huggingface.co/pipeline/feature-extraction/${HF_MODEL}`,
+    `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`,
     {
       method: "POST",
       headers: {
         Authorization: `Bearer ${HF_API_KEY}`,
         "Content-Type": "application/json",
+        "x-wait-for-model": "true",
       },
       body: JSON.stringify({
         inputs: text,
-        options: { wait_for_model: true },
       }),
     }
   );
@@ -43,6 +45,12 @@ const embedWithHuggingFace = async (text) => {
   }
 
   const embedding = await response.json();
+  
+  // Handle nested array response - flatten if needed
+  if (Array.isArray(embedding) && Array.isArray(embedding[0])) {
+    return embedding[0];
+  }
+  
   return embedding;
 };
 
