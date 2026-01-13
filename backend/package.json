@@ -13,14 +13,14 @@
     "nodemailer": "^6.9.7",
     "officeparser": "^5.2.2",
     "openai": "^6.15.0",
-    "pdf-parse": "^2.4.5"
+    "pdf-parse": "^2.4.5",
+    "pdfjs-dist": "^5.4.530"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
   },
   "type": "module",
-"scripts": {
-  "start": "nodemon server.js"
-}
-
+  "scripts": {
+    "start": "nodemon server.js"
+  }
 }
