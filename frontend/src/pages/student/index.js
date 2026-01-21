@@ -1,0 +1,8 @@
+/**
+ * Student Pages Index
+ * Export all student pages from a single point
+ */
+export { default as StudentDashboard } from './Dashboard';
+export { default as SearchMaterials } from './SearchMaterials';
+export { default as SubmitFeedback } from './SubmitFeedback';
+export { default as MyFeedbacks } from './MyFeedbacks';
