@@ -1,0 +1,7 @@
+/**
+ * Admin Pages Index
+ * Export all admin pages from a single point
+ */
+export { default as AdminDashboard } from './Dashboard';
+export { default as UserManagement } from './UserManagement';
+export { default as AdminFeedbacks } from './Feedbacks';
