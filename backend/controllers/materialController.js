@@ -13,7 +13,7 @@ import path from "path";
 
 export const uploadMaterial = async (req, res) => {
   try {
-    const { title, course, type } = req.body;
+    const { courseTitle, courseNo, type } = req.body;
     const file = req.file;
 
     if (!req.file) {
@@ -36,8 +36,8 @@ export const uploadMaterial = async (req, res) => {
     const fileUrl = await uploadToCloudinary(file.path);
 
     const material = {
-      title,
-      course,
+      courseTitle,
+      courseNo,
       type,
       fileUrl,
       textContent,

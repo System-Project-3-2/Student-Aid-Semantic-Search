@@ -4,7 +4,7 @@ import { cosineSimilarity } from "../utils/cosineSimilarity.js";
 
 export const semanticSearch = async (req, res) => {
   try {
-    const { query, course, type } = req.body;
+    const { query, courseNo, type } = req.body;
 
     if (!query) {
       return res.status(400).json({ message: "Query is required" });
@@ -14,7 +14,7 @@ export const semanticSearch = async (req, res) => {
 
     // Build material filter
     const materialFilter = {};
-    if (course) materialFilter.course = course;
+    if (courseNo) materialFilter.courseNo = courseNo;
     if (type) materialFilter.type = type;
 
     // Fetch chunks with filtered materials
@@ -28,8 +28,8 @@ export const semanticSearch = async (req, res) => {
 
     const scored = validChunks.map((chunk) => ({
       materialId: chunk.materialId._id.toString(), //material ID as string
-      title: chunk.materialId.title,
-      course: chunk.materialId.course,
+      courseTitle: chunk.materialId.courseTitle,
+      courseNo: chunk.materialId.courseNo,
       type: chunk.materialId.type,
       fileUrl: chunk.materialId.fileUrl,
       text: chunk.chunkText,
@@ -43,8 +43,8 @@ export const semanticSearch = async (req, res) => {
     for (const item of scored.slice(0, 30)) {
       if (!grouped[item.materialId]) {
         grouped[item.materialId] = {
-          title: item.title,
-          course: item.course,
+          courseTitle: item.courseTitle,
+          courseNo: item.courseNo,
           type: item.type,
           fileUrl: item.fileUrl,
           matches: [],
