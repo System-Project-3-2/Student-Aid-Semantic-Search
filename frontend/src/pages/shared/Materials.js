@@ -100,6 +100,11 @@ const MaterialCardItem = ({ material, userRole, currentUserId, onDelete, onEdit,
   const canDelete = userRole === 'admin' || (userRole === 'teacher' && isOwner);
   const isReadOnly = userRole === 'student';
 
+  // Get display title - fallback to courseNo if courseTitle is empty
+  const displayTitle = material.courseTitle || material.courseNo || 'Untitled Material';
+  // Get uploader name - handle both populated and unpopulated cases
+  const uploaderName = material.uploadedBy?.name || material.uploadedBy?.email || 'Unknown';
+
   return (
     <Card
       elevation={0}
@@ -131,7 +136,7 @@ const MaterialCardItem = ({ material, userRole, currentUserId, onDelete, onEdit,
       >
         <Chip
           size="small"
-          label={material.type}
+          label={material.type || 'Document'}
           sx={{
             bgcolor: alpha(theme.palette.primary.main, 0.1),
             color: 'primary.main',
@@ -168,7 +173,7 @@ const MaterialCardItem = ({ material, userRole, currentUserId, onDelete, onEdit,
           <Typography
             variant="subtitle1"
             fontWeight={600}
-            title={material.courseTitle}
+            title={displayTitle}
             sx={{
               color: 'text.primary',
               lineHeight: 1.3,
@@ -179,15 +184,17 @@ const MaterialCardItem = ({ material, userRole, currentUserId, onDelete, onEdit,
               overflow: 'hidden',
             }}
           >
-            {material.courseTitle}
+            {displayTitle}
           </Typography>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ fontWeight: 500 }}
-          >
-            {material.courseNo}
-          </Typography>
+          {material.courseNo && material.courseTitle && (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontWeight: 500 }}
+            >
+              {material.courseNo}
+            </Typography>
+          )}
         </Box>
       </Box>
 
@@ -205,7 +212,7 @@ const MaterialCardItem = ({ material, userRole, currentUserId, onDelete, onEdit,
             <PersonIcon sx={{ fontSize: 14 }} />
           </Avatar>
           <Typography variant="caption" color="text.secondary" noWrap>
-            {material.uploadedBy?.name || 'Unknown'}
+            {uploaderName}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -562,6 +569,7 @@ const Materials = () => {
   const [expandedCourse, setExpandedCourse] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, material: null });
   const [editDialog, setEditDialog] = useState({ open: false, material: null });
+  const [previewDialog, setPreviewDialog] = useState({ open: false, material: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const userRole = user?.role;
@@ -575,6 +583,10 @@ const Materials = () => {
     try {
       setIsLoading(true);
       const data = await materialService.getAllMaterials();
+      console.log('Fetched materials:', data); // Debug log
+      if (data.length > 0) {
+        console.log('First material uploadedBy:', data[0].uploadedBy); // Debug log
+      }
       setMaterials(data);
       // Expand first course by default
       if (data.length > 0) {
@@ -638,11 +650,42 @@ const Materials = () => {
   }, [filteredMaterials]);
 
   const handleDownload = (material) => {
-    window.open(material.fileUrl, '_blank');
+    if (!material.fileUrl) {
+      setSnackbar({
+        open: true,
+        message: 'File URL not available for this material.',
+        severity: 'error',
+      });
+      return;
+    }
+    // Create a download link
+    const link = document.createElement('a');
+    link.href = material.fileUrl;
+    link.target = '_blank';
+    link.download = material.courseTitle || 'material';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleView = (material) => {
-    window.open(material.fileUrl, '_blank');
+    if (!material.fileUrl) {
+      setSnackbar({
+        open: true,
+        message: 'File URL not available for this material.',
+        severity: 'error',
+      });
+      return;
+    }
+    setPreviewDialog({ open: true, material });
+  };
+
+  const handlePreviewClose = () => {
+    setPreviewDialog({ open: false, material: null });
+  };
+
+  const handleOpenInNewTab = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleDeleteClick = (material) => {
@@ -1037,6 +1080,103 @@ const Materials = () => {
         onClose={() => setEditDialog({ open: false, material: null })}
         onSave={handleEditSave}
       />
+
+      {/* Preview Dialog */}
+      <Dialog
+        open={previewDialog.open}
+        onClose={handlePreviewClose}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: { 
+            borderRadius: 3, 
+            height: '85vh',
+            maxHeight: '85vh',
+          },
+        }}
+      >
+        <DialogTitle sx={{ pb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ViewIcon color="info" />
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="h6" noWrap>
+              {previewDialog.material?.courseTitle || previewDialog.material?.courseNo || 'Preview'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {previewDialog.material?.type} • {previewDialog.material?.courseNo}
+            </Typography>
+          </Box>
+          <Tooltip title="Open in New Tab">
+            <IconButton
+              onClick={() => handleOpenInNewTab(previewDialog.material?.fileUrl)}
+              sx={{ mr: 1 }}
+            >
+              <UploadIcon sx={{ transform: 'rotate(45deg)' }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Download">
+            <IconButton
+              onClick={() => handleDownload(previewDialog.material)}
+              sx={{ mr: 1 }}
+            >
+              <DownloadIcon />
+            </IconButton>
+          </Tooltip>
+          <IconButton onClick={handlePreviewClose}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
+          {previewDialog.material?.fileUrl ? (
+            <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+              {/* For PDFs, use iframe directly */}
+              {previewDialog.material.fileUrl.toLowerCase().includes('.pdf') ? (
+                <iframe
+                  src={previewDialog.material.fileUrl}
+                  title="Material Preview"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                  }}
+                />
+              ) : (
+                /* For other files, use Google Docs Viewer */
+                <iframe
+                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewDialog.material.fileUrl)}&embedded=true`}
+                  title="Material Preview"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                  }}
+                />
+              )}
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                gap: 2,
+                color: 'text.secondary',
+              }}
+            >
+              <DocumentIcon sx={{ fontSize: 64, opacity: 0.5 }} />
+              <Typography>Preview not available</Typography>
+              <Button
+                variant="contained"
+                startIcon={<DownloadIcon />}
+                onClick={() => handleDownload(previewDialog.material)}
+              >
+                Download Instead
+              </Button>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Snackbar for notifications */}
       <Snackbar

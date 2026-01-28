@@ -27,18 +27,6 @@ import toast from 'react-hot-toast';
 import { PageHeader } from '../../components';
 import { materialService } from '../../services';
 
-// Course options - can be fetched from API in production
-const COURSES = [
-  'Computer Science',
-  'Mathematics',
-  'Physics',
-  'Chemistry',
-  'Electronics',
-  'Mechanical Engineering',
-  'Civil Engineering',
-  'Electrical Engineering',
-];
-
 // Material types
 const MATERIAL_TYPES = ['Lecture Notes', 'Assignment', 'Lab Report', 'Book', 'Slides', 'Other'];
 
@@ -50,8 +38,8 @@ const UploadMaterial = () => {
   const fileInputRef = useRef(null);
   
   const [formData, setFormData] = useState({
-    title: '',
-    course: '',
+    courseTitle: '',
+    courseNo: '',
     type: '',
   });
   const [file, setFile] = useState(null);
@@ -94,12 +82,12 @@ const UploadMaterial = () => {
   };
 
   const validateForm = () => {
-    if (!formData.title.trim()) {
-      setError('Please enter a title');
+    if (!formData.courseTitle.trim()) {
+      setError('Please enter a course title');
       return false;
     }
-    if (!formData.course) {
-      setError('Please select a course');
+    if (!formData.courseNo.trim()) {
+      setError('Please enter a course number');
       return false;
     }
     if (!formData.type) {
@@ -124,8 +112,8 @@ const UploadMaterial = () => {
 
     try {
       const uploadData = new FormData();
-      uploadData.append('title', formData.title);
-      uploadData.append('course', formData.course);
+      uploadData.append('courseTitle', formData.courseTitle);
+      uploadData.append('courseNo', formData.courseNo);
       uploadData.append('type', formData.type);
       uploadData.append('file', file);
 
@@ -208,31 +196,25 @@ const UploadMaterial = () => {
 
         <TextField
           fullWidth
-          label="Material Title"
-          name="title"
-          value={formData.title}
+          label="Course Title"
+          name="courseTitle"
+          value={formData.courseTitle}
           onChange={handleChange}
           required
           sx={{ mb: 3 }}
           placeholder="e.g., Introduction to Data Structures"
         />
 
-        <FormControl fullWidth sx={{ mb: 3 }}>
-          <InputLabel>Course</InputLabel>
-          <Select
-            name="course"
-            value={formData.course}
-            label="Course"
-            onChange={handleChange}
-            required
-          >
-            {COURSES.map((course) => (
-              <MenuItem key={course} value={course}>
-                {course}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <TextField
+          fullWidth
+          label="Course Number"
+          name="courseNo"
+          value={formData.courseNo}
+          onChange={handleChange}
+          required
+          sx={{ mb: 3 }}
+          placeholder="e.g., CSE101, MATH201"
+        />
 
         <FormControl fullWidth sx={{ mb: 3 }}>
           <InputLabel>Material Type</InputLabel>
