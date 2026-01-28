@@ -27,6 +27,7 @@ import {
   Assignment as AssignmentIcon,
   Add as AddIcon,
   List as ListIcon,
+  LibraryBooks as LibraryIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks';
 
@@ -37,18 +38,21 @@ const getNavItems = (role) => {
   const items = {
     student: [
       { text: 'Dashboard', icon: <DashboardIcon />, path: '/student/dashboard' },
+      { text: 'All Materials', icon: <LibraryIcon />, path: '/student/materials' },
       { text: 'Search Materials', icon: <SearchIcon />, path: '/student/search' },
       { text: 'Submit Feedback', icon: <AddIcon />, path: '/student/feedback/new' },
       { text: 'My Feedbacks', icon: <FeedbackIcon />, path: '/student/feedbacks' },
     ],
     teacher: [
       { text: 'Dashboard', icon: <DashboardIcon />, path: '/teacher/dashboard' },
+      { text: 'My Materials', icon: <LibraryIcon />, path: '/teacher/materials' },
       { text: 'Upload Material', icon: <UploadIcon />, path: '/teacher/materials/upload' },
       { text: 'All Feedbacks', icon: <FeedbackIcon />, path: '/teacher/feedbacks' },
       { text: 'Search Materials', icon: <SearchIcon />, path: '/teacher/search' },
     ],
     admin: [
       { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin/dashboard' },
+      { text: 'All Materials', icon: <LibraryIcon />, path: '/admin/materials' },
       { text: 'User Management', icon: <PeopleIcon />, path: '/admin/users' },
       { text: 'All Feedbacks', icon: <FeedbackIcon />, path: '/admin/feedbacks' },
       { text: 'Upload Material', icon: <UploadIcon />, path: '/admin/materials/upload' },
