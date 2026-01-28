@@ -11,6 +11,7 @@ import { embedText } from "../services/embeddingServices.js";
 
 import path from "path";
 
+// Upload material (Teacher/Admin only)
 export const uploadMaterial = async (req, res) => {
   try {
     const { courseTitle, courseNo, type } = req.body;
@@ -41,6 +42,7 @@ export const uploadMaterial = async (req, res) => {
       type,
       fileUrl,
       textContent,
+      uploadedBy: req.user._id,
     };
 
     const newMaterial = await Material.create(material);
@@ -60,13 +62,104 @@ export const uploadMaterial = async (req, res) => {
   }
 };
 
-export const deleteMaterial = async (req, res) => {
+// Get all materials (Admin/Student - all materials, Teacher - own materials only)
+export const getAllMaterials = async (req, res) => {
+  try {
+    const { role, _id } = req.user;
+    let materials;
+
+    if (role === "teacher") {
+      // Teachers can only see their own materials
+      materials = await Material.find({ uploadedBy: _id })
+        .populate("uploadedBy", "name email")
+        .select("-textContent")
+        .sort({ createdAt: -1 });
+    } else {
+      // Admin and Student can see all materials
+      materials = await Material.find()
+        .populate("uploadedBy", "name email")
+        .select("-textContent")
+        .sort({ createdAt: -1 });
+    }
+
+    res.status(200).json(materials);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get single material by ID
+export const getMaterialById = async (req, res) => {
   try {
     const { id } = req.params;
-    const material = await Material.findById(id);
+    const { role, _id } = req.user;
+
+    const material = await Material.findById(id)
+      .populate("uploadedBy", "name email");
+
     if (!material) {
       return res.status(404).json({ message: "Material not found" });
     }
+
+    // Teachers can only access their own materials
+    if (role === "teacher" && material.uploadedBy._id.toString() !== _id.toString()) {
+      return res.status(403).json({ message: "Access denied. You can only view your own materials." });
+    }
+
+    res.status(200).json(material);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Update material (Admin - any, Teacher - own only)
+export const updateMaterial = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { courseTitle, courseNo, type } = req.body;
+    const { role, _id } = req.user;
+
+    const material = await Material.findById(id);
+
+    if (!material) {
+      return res.status(404).json({ message: "Material not found" });
+    }
+
+    // Teachers can only update their own materials
+    if (role === "teacher" && material.uploadedBy.toString() !== _id.toString()) {
+      return res.status(403).json({ message: "Access denied. You can only update your own materials." });
+    }
+
+    // Update only provided fields
+    if (courseTitle) material.courseTitle = courseTitle;
+    if (courseNo) material.courseNo = courseNo;
+    if (type) material.type = type;
+
+    const updatedMaterial = await material.save();
+
+    res.status(200).json(updatedMaterial);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete material (Admin - any, Teacher - own only)
+export const deleteMaterial = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role, _id } = req.user;
+
+    const material = await Material.findById(id);
+
+    if (!material) {
+      return res.status(404).json({ message: "Material not found" });
+    }
+
+    // Teachers can only delete their own materials
+    if (role === "teacher" && material.uploadedBy.toString() !== _id.toString()) {
+      return res.status(403).json({ message: "Access denied. You can only delete your own materials." });
+    }
+
     await deletefromCloudinary(material.fileUrl);
     await Material.findByIdAndDelete(id);
     await MaterialChunk.deleteMany({ materialId: id });

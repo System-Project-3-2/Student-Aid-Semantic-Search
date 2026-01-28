@@ -8,6 +8,11 @@ const materialSchema = new mongoose.Schema(
     fileUrl: { type: String, required: true },
     textContent: { type: String },
     // embedding: { type: Array },
+    uploadedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true }
 );
