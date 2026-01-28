@@ -649,7 +649,7 @@ const Materials = () => {
     return Object.values(groups).sort((a, b) => a.courseNo.localeCompare(b.courseNo));
   }, [filteredMaterials]);
 
-  const handleDownload = (material) => {
+  const handleDownload = async (material) => {
     if (!material.fileUrl) {
       setSnackbar({
         open: true,
@@ -658,14 +658,22 @@ const Materials = () => {
       });
       return;
     }
-    // Create a download link
-    const link = document.createElement('a');
-    link.href = material.fileUrl;
-    link.target = '_blank';
-    link.download = material.courseTitle || 'material';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+
+    try {
+      // Extract filename from URL or use courseTitle
+      const urlParts = material.fileUrl.split('/');
+      const cloudinaryFilename = urlParts[urlParts.length - 1];
+      const filename = material.courseTitle 
+        ? `${material.courseTitle}${cloudinaryFilename.substring(cloudinaryFilename.lastIndexOf('.'))}`
+        : cloudinaryFilename;
+
+      // Use materialService download function for proper handling
+      await materialService.downloadFile(material.fileUrl, filename);
+    } catch (error) {
+      console.error('Download error:', error);
+      // Fallback: open in new tab
+      window.open(material.fileUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const handleView = (material) => {
@@ -1128,19 +1136,23 @@ const Materials = () => {
         <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
           {previewDialog.material?.fileUrl ? (
             <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-              {/* For PDFs, use iframe directly */}
+              {/* For PDFs, try direct iframe first, then Google Docs Viewer as fallback */}
               {previewDialog.material.fileUrl.toLowerCase().includes('.pdf') ? (
                 <iframe
-                  src={previewDialog.material.fileUrl}
+                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewDialog.material.fileUrl)}&embedded=true`}
                   title="Material Preview"
                   style={{
                     width: '100%',
                     height: '100%',
                     border: 'none',
                   }}
+                  onError={(e) => {
+                    // Fallback to direct URL if Google Viewer fails
+                    e.target.src = previewDialog.material.fileUrl;
+                  }}
                 />
               ) : (
-                /* For other files, use Google Docs Viewer */
+                /* For other files (DOCX, PPTX), use Google Docs Viewer */
                 <iframe
                   src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewDialog.material.fileUrl)}&embedded=true`}
                   title="Material Preview"

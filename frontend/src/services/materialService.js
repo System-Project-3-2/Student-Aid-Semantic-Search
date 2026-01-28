@@ -4,6 +4,55 @@
  */
 import api from './api';
 
+/**
+ * Helper function to ensure Cloudinary URLs are properly formatted
+ * @param {string} url - The URL to validate/fix
+ * @returns {string} - Properly formatted URL
+ */
+const ensureValidUrl = (url) => {
+  if (!url) return null;
+  
+  // If URL doesn't start with http/https, try to fix it
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    // Check if it's a relative Cloudinary path
+    if (url.includes('cloudinary')) {
+      return `https://${url}`;
+    }
+  }
+  
+  return url;
+};
+
+/**
+ * Force download a file from URL using fetch (handles CORS)
+ * @param {string} url - File URL
+ * @param {string} filename - Desired filename
+ */
+const downloadFile = async (url, filename) => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Download failed');
+    
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up blob URL
+    window.URL.revokeObjectURL(blobUrl);
+    return true;
+  } catch (error) {
+    // Fallback: open in new tab
+    window.open(url, '_blank');
+    return false;
+  }
+};
+
 const materialService = {
   /**
    * Get all materials (role-based: teacher sees own, admin/student sees all)
@@ -11,7 +60,12 @@ const materialService = {
    */
   getAllMaterials: async () => {
     const response = await api.get('/materials');
-    return response.data;
+    // Validate URLs in response
+    const materials = response.data.map(material => ({
+      ...material,
+      fileUrl: ensureValidUrl(material.fileUrl),
+    }));
+    return materials;
   },
 
   /**
@@ -21,7 +75,10 @@ const materialService = {
    */
   getMaterialById: async (materialId) => {
     const response = await api.get(`/materials/${materialId}`);
-    return response.data;
+    return {
+      ...response.data,
+      fileUrl: ensureValidUrl(response.data.fileUrl),
+    };
   },
 
   /**
@@ -68,6 +125,18 @@ const materialService = {
     const response = await api.post('/search', searchParams);
     return response.data;
   },
+
+  /**
+   * Download a material file
+   * @param {string} url - File URL
+   * @param {string} filename - Filename to save as
+   */
+  downloadFile,
+
+  /**
+   * Validate a URL
+   */
+  ensureValidUrl,
 };
 
 export default materialService;
