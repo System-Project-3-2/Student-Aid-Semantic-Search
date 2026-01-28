@@ -33,6 +33,23 @@ app.use("/api/feedbacks", feedbackRoutes);
 
 app.use("/api/admin", adminRoutes);
 
+// Global error handler for multer and other errors
+app.use((err, req, res, next) => {
+  console.error('Error:', err.message);
+  
+  // Handle Multer errors
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ message: 'File too large. Maximum size is 50MB.' });
+  }
+  
+  if (err.message === 'Only PDF, DOCX, PPTX allowed') {
+    return res.status(400).json({ message: err.message });
+  }
+  
+  // Handle other errors
+  res.status(500).json({ message: err.message || 'Internal server error' });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
