@@ -32,6 +32,9 @@ import {
   AdminFeedbacks,
 } from '../pages/admin';
 
+// Shared Pages
+import Materials from '../pages/shared/Materials';
+
 // Other Pages
 import NotFound from '../pages/NotFound';
 
@@ -56,6 +59,7 @@ const AppRouter = () => {
       >
         <Route index element={<Navigate to="/student/dashboard" replace />} />
         <Route path="dashboard" element={<StudentDashboard />} />
+        <Route path="materials" element={<Materials />} />
         <Route path="search" element={<SharedSearchMaterials />} />
         <Route path="feedback/new" element={<SubmitFeedback />} />
         <Route path="feedbacks" element={<MyFeedbacks />} />
@@ -72,6 +76,7 @@ const AppRouter = () => {
       >
         <Route index element={<Navigate to="/teacher/dashboard" replace />} />
         <Route path="dashboard" element={<TeacherDashboard />} />
+        <Route path="materials" element={<Materials />} />
         <Route path="materials/upload" element={<UploadMaterial />} />
         <Route path="feedbacks" element={<TeacherFeedbacks />} />
         <Route path="search" element={<SharedSearchMaterials />} />
@@ -88,6 +93,7 @@ const AppRouter = () => {
       >
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="materials" element={<Materials />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="feedbacks" element={<AdminFeedbacks />} />
         <Route path="materials/upload" element={<UploadMaterial />} />
