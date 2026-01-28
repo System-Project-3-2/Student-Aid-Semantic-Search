@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 
 const materialSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
+    tcourseTitle: { type: String, required: true },
     type: { type: String, required: true },
-    course: { type: String, required: true },
+    courseNo: { type: String, required: true },
     fileUrl: { type: String, required: true },
     textContent: { type: String },
     // embedding: { type: Array },
